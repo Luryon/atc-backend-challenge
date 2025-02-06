@@ -22,25 +22,38 @@ export class GetAvailabilityHandler
   async execute(query: GetAvailabilityQuery): Promise<ClubWithAvailability[]> {
     const clubs_with_availability: ClubWithAvailability[] = [];
     const clubs = await this.alquilaTuCanchaClient.getClubs(query.placeId);
-    for (const club of clubs) {
+    //Se refactoriza el sistema para usar Promise.All y procesar los clubes juntos
+
+    const promisesClubs = clubs.map(async (club) => {
+
       const courts = await this.alquilaTuCanchaClient.getCourts(club.id);
-      const courts_with_availability: ClubWithAvailability['courts'] = [];
-      for (const court of courts) {
+
+      const courtsPromises = courts.map(async (court) => {
+      
         const slots = await this.alquilaTuCanchaClient.getAvailableSlots(
           club.id,
           court.id,
           query.date,
         );
-        courts_with_availability.push({
-          ...court,
-          available: slots,
-        });
-      }
-      clubs_with_availability.push({
+
+        return {...court, available: slots}
+    });
+    //Se esperan que se terminen las promesas
+    const courtsWithAvailability = await Promise.all(courtsPromises);
+          return {
         ...club,
-        courts: courts_with_availability,
-      });
-    }
-    return clubs_with_availability;
-  }
+        courts: courtsWithAvailability,
+      };
+    });
+
+
+
+
+    const results = (await Promise.all(promisesClubs)).filter(
+      (club): club is ClubWithAvailability => club !== null,
+    );
+
+    return results;
+
+}
 }

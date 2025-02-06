@@ -24,7 +24,7 @@ export class HTTPAlquilaTuCanchaClient implements AlquilaTuCanchaClient {
       .then((res) => res.data);
   }
 
-  getCourts(clubId: number): Promise<Court[]> {
+  async getCourts(clubId: number): Promise<Court[]> {
     return this.httpService.axiosRef
       .get(`/clubs/${clubId}/courts`, {
         baseURL: this.base_url,
@@ -32,7 +32,7 @@ export class HTTPAlquilaTuCanchaClient implements AlquilaTuCanchaClient {
       .then((res) => res.data);
   }
 
-  getAvailableSlots(
+  async getAvailableSlots(
     clubId: number,
     courtId: number,
     date: Date,
