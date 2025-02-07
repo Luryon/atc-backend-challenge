@@ -26,7 +26,9 @@ export class GetAvailabilityHandler
 
   async execute(query: GetAvailabilityQuery): Promise<ClubWithAvailability[]> {
 
-    const cachedAvaility = await this.cacheManager.get<ClubWithAvailability[]>(query.placeId);
+    const key = `db_cache_${query.placeId}-${query.date}`;
+
+    const cachedAvaility = await this.cacheManager.get<ClubWithAvailability[]>(key);
     if (cachedAvaility) {
       return cachedAvaility;
     }
@@ -63,7 +65,7 @@ export class GetAvailabilityHandler
     );
 
 
-    this.cacheManager.set(query.placeId, data, 1000 * 10)
+    this.cacheManager.set(key, data, 1000 * 10)
     return data;
 }
 }
