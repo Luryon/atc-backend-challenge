@@ -17,9 +17,20 @@ export class GetAvailabilityHandler
   constructor(
     @Inject(ALQUILA_TU_CANCHA_CLIENT)
     private alquilaTuCanchaClient: AlquilaTuCanchaClient,
+
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async execute(query: GetAvailabilityQuery): Promise<ClubWithAvailability[]> {
+
+
+    const placeAvailityCached = await this.cacheManager.get(query.placeId);
+    if (placeAvailityCached) {
+      return placeAvailityCached
+    }
+    
+
+
     const clubs_with_availability: ClubWithAvailability[] = [];
     const clubs = await this.alquilaTuCanchaClient.getClubs(query.placeId);
     
@@ -50,6 +61,8 @@ export class GetAvailabilityHandler
     const data = (await Promise.all(promisesClubs)).filter(
       (club): club is ClubWithAvailability => club !== null,
     );
+
+    this.cacheManager.set(query.placeId, data, 1000 * 10);
 
     return data;
 }

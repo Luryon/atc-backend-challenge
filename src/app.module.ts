@@ -1,5 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { CacheModule } from "@nestjs/cache-manager"
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 
@@ -11,7 +12,7 @@ import { EventsController } from './infrastructure/controllers/events.controller
 import { SearchController } from './infrastructure/controllers/search.controller';
 
 @Module({
-  imports: [HttpModule, CqrsModule, ConfigModule.forRoot()],
+  imports: [CacheModule.register({isGlobal: true}), HttpModule, CqrsModule, ConfigModule.forRoot()],
   controllers: [SearchController, EventsController],
   providers: [
     {
